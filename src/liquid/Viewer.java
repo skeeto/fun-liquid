@@ -13,6 +13,8 @@ import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
+import java.util.Observable;
+import java.util.Observer;
 import javax.swing.JComponent;
 import lombok.Setter;
 import org.jbox2d.collision.shapes.CircleShape;
@@ -26,7 +28,7 @@ import org.jbox2d.dynamics.World;
 /**
  * Displays a view of a JBox2D world.
  */
-public class Viewer extends JComponent {
+public class Viewer extends JComponent implements Observer {
 
     private static final Color BACKGROUND = Color.BLACK;
     private static final Color FOREGROUND = Color.WHITE;
@@ -48,17 +50,22 @@ public class Viewer extends JComponent {
 
     /**
      * Create a display of a world at a given location.
-     * @param world  the world to be displayed
-     * @param view   a rectangle describing the section to be viewed
+     * @param bottle  the bottle to be displayed
      */
-    public Viewer(final World world, final Rectangle2D view) {
-        this.world = world;
-        this.view = view;
+    public Viewer(final Bottle bottle) {
+        this.world = bottle.getWorld();
+        this.view = bottle.getView();
         Dimension size = new Dimension((int) (view.getWidth() * SCALE),
                                        (int) (view.getHeight() * SCALE));
         setPreferredSize(size);
         vkernel = makeKernel(KERNEL_SIZE, true);
         hkernel = makeKernel(KERNEL_SIZE, false);
+        bottle.addObserver(this);
+    }
+
+    @Override
+    public final void update(final Observable o, final Object arg) {
+        repaint();
     }
 
     @Override
