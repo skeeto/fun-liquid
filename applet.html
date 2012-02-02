@@ -7,11 +7,17 @@
         text-align: center;
       }
       p {
-        width: 400px;
+        width: 500px;
         margin-left: auto;
         margin-right: auto;
         text-align: justify;
         text-indent: 3em;
+      }
+      li {
+        width: 450px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: left;
       }
       a {
         color: DarkKhaki;
@@ -30,11 +36,22 @@
       </applet>
     </p>
     <p>
-      The idea is simple: do a physics simulation of balls in a
-      container (<a href="http://jbox2d.org/">JBox2D</a>), render the
-      simulation onto a raster, blur the image, then apply a
-      threshold. What you're left with is a cartoon-ish, chunky
-      liquid. Use the controls to see the components of this process.
+      The idea is simple:
+    </p>
+    <ol>
+      <li>Do a physics simulation of balls in a container
+        (<a href="http://jbox2d.org/">JBox2D</a>)</li>
+      <li>Render the simulation onto a raster.</li>
+      <li>Blur the image.</li>
+      <li>Apply a threshold.</li>
+    </ol>
+    <p>
+      What you're left with is a cartoon-ish, chunky liquid. Use the
+      controls to see the components of this process.
+    </p>
+    <p>
+      See the <a href="https://github.com/skeeto/fun-liquid">Git
+      repository</a> for full source code listing.
     </p>
     <p>
       Original idea:
