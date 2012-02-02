@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Graphics;
+import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
@@ -42,9 +43,16 @@ public class Viewer extends JComponent {
         Graphics2D g = (Graphics2D) graphics;
         g.setColor(BACKGROUND);
         g.fillRect(0, 0, getWidth(), getHeight());
+
+        /* Set up coordinate system. */
         g.translate(getWidth() / 2, getHeight() / 2);
         g.scale(SCALE, -SCALE);
 
+        /* Configure rendering options. */
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                           RenderingHints.VALUE_ANTIALIAS_ON);
+
+        /* Draw each body. */
         g.setColor(FOREGROUND);
         Body body = world.getBodyList();
         while (body != null) {
