@@ -33,8 +33,8 @@ public class Viewer extends JComponent implements Observer {
     private static final Color BACKGROUND = Color.BLACK;
     private static final Color FOREGROUND = Color.WHITE;
     private static final Color STATIC     = Color.GRAY;
-    private static final int KERNEL_SIZE = 14;
-    private static final int THRESHOLD = 0x2f * 3;
+    private static final int KERNEL_SIZE = 12;
+    private static final int THRESHOLD = 28 * 3;
 
     private static final long serialVersionUID = 1L;
 

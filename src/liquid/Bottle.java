@@ -39,11 +39,11 @@ public class Bottle extends Observable {
     private static final long FLIP_RATE = 3500L;
 
     /* Balls */
-    private static final int BALLS = 150;
-    private static final float BALL_RADIUS = 0.75f;
+    private static final int BALLS = 400;
+    private static final float BALL_RADIUS = 0.5f;
     private static final float BALL_DENSITY = 1f;
     private static final float BALL_FRICTION = 0f;
-    private static final float BALL_RESTITUTION = 0.4f;
+    private static final float BALL_RESTITUTION = 0.3f;
 
     private static final float SPIKE_THICKNESS = 12f;
     private static final float SPIKE_EXTENT = 20f;
