@@ -22,7 +22,7 @@ import org.jbox2d.dynamics.World;
 public class Launcher {
 
     /* Solver */
-    private static final float DT = 1f / 10f; // seconds
+    private static final float DT = 1f / 15f; // seconds
     private static final int V_ITERATIONS = 8;
     private static final int P_ITERATIONS = 3;
 
@@ -30,12 +30,12 @@ public class Launcher {
     private static final float WIDTH = 50f;
     private static final float HEIGHT = 70f;
     private static final float THICKNESS = 1f;
-    private static final Vec2 GRAVITY = new Vec2(0, -2);
+    private static final Vec2 GRAVITY = new Vec2(0, -0.5f);
     private static final Rectangle2D VIEW =
         new Rectangle2D.Float(WIDTH / -2, HEIGHT / -2, WIDTH, HEIGHT);
 
     /* Balls */
-    private static final int BALLS = 50;
+    private static final int BALLS = 100;
     private static final float BALL_DENSITY = 1f;
     private static final float BALL_FRICTION = 0.1f;
     private static final float BALL_RESTITUTION = 0.6f;
