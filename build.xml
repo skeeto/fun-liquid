@@ -12,6 +12,7 @@
   <property name="src.dir" value="src"/>
   <property name="build.dir" value="build"/>
   <property name="dist.dir" value="dist"/>
+  <property name="applet.html" value="applet.html"/>
 
   <!-- Targets -->
 
@@ -51,6 +52,9 @@
         <attribute name="Main-Class" value="${main.class}"/>
       </manifest>
     </jar>
+    <copy file="${applet.html}" tofile="${dist.dir}/index.html"/>
+    <replace file="${dist.dir}/index.html"
+             token="$VERSION" value="${version}"/>
   </target>
 
   <target name="run" depends="compile"
@@ -112,5 +116,11 @@
       <fileset dir="${src.dir}" includes="**/*.java"/>
       <classpath path="${build.dir}/classes"/>
     </checkstyle>
+  </target>
+
+  <target name="applet" depends="jar" description="Run the applet version.">
+    <exec executable="appletviewer">
+      <arg value="${dist.dir}/index.html"/>
+    </exec>
   </target>
 </project>

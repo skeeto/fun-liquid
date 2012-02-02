@@ -94,6 +94,9 @@ public class Bottle extends Observable implements Runnable {
         } catch (InterruptedException e) {
             exec.shutdownNow();
             log.info("termination interrupted");
+        } catch (java.security.AccessControlException e) {
+            /* Can't call shutdown() inside the security sandbox. */
+            log.info("looks like we're an applet, can't shutdown");
         }
     }
 
