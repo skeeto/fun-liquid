@@ -1,7 +1,10 @@
 package liquid;
 
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import lombok.val;
@@ -32,6 +35,7 @@ public final class Controls extends JPanel {
                 }
             });
         add(threshold);
+
         val blur = new JCheckBox("Blur", true);
         blur.addActionListener(new ActionListener() {
                 public void actionPerformed(final ActionEvent e) {
@@ -40,5 +44,19 @@ public final class Controls extends JPanel {
                 }
             });
         add(blur);
+
+        val pause = new JButton("Pause");
+        pause.addActionListener(new ActionListener() {
+                public void actionPerformed(final ActionEvent e) {
+                    if (bottle.isRunning()) {
+                        bottle.stop();
+                        pause.setText("Play");
+                    } else {
+                        new Thread(bottle).start();
+                        pause.setText("Pause");
+                    }
+                }
+            });
+        add(pause);
     }
 }
