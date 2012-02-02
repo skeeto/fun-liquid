@@ -93,7 +93,7 @@ public class Viewer extends JComponent implements Observer {
         if (!blur) {
             g.setColor(BACKGROUND);
             g.fillRect(0, 0, getWidth(), getHeight());
-            draw(g, getWidth(), getHeight(), true,
+            draw((Graphics2D) g.create(), getWidth(), getHeight(), true,
                  BodyType.DYNAMIC, FOREGROUND);
         } else {
             Dimension size = getPreferredSize();
