@@ -22,7 +22,7 @@ import org.jbox2d.dynamics.World;
 public class Launcher {
 
     /* Solver */
-    private static final float DT = 1f / 15f; // seconds
+    private static final float DT = 1f / 30f; // seconds
     private static final int V_ITERATIONS = 8;
     private static final int P_ITERATIONS = 3;
 
@@ -30,10 +30,10 @@ public class Launcher {
     private static final float WIDTH = 50f;
     private static final float HEIGHT = 70f;
     private static final float THICKNESS = 1f;
-    private static final Vec2 GRAVITY = new Vec2(0, -0.002f);
+    private static final Vec2 GRAVITY = new Vec2(0, -15f);
     private static final Rectangle2D VIEW =
         new Rectangle2D.Float(WIDTH / -2, HEIGHT / -2, WIDTH, HEIGHT);
-    private static final long FLIP_RATE = 1500L;
+    private static final long FLIP_RATE = 3500L;
 
     /* Balls */
     private static final int BALLS = 100;
@@ -69,14 +69,12 @@ public class Launcher {
         val exec = Executors.newSingleThreadScheduledExecutor();
         exec.scheduleAtFixedRate(new Runnable() {
                 public void run() {
-                    while (true) {
-                        world.step(DT, V_ITERATIONS, P_ITERATIONS);
-                        viewer.repaint();
-                        if (System.currentTimeMillis() / FLIP_RATE % 2 == 0) {
-                            world.setGravity(GRAVITY.negate());
-                        } else {
-                            world.setGravity(GRAVITY);
-                        }
+                    world.step(DT, V_ITERATIONS, P_ITERATIONS);
+                    viewer.repaint();
+                    if (System.currentTimeMillis() / FLIP_RATE % 2 == 0) {
+                        world.setGravity(GRAVITY.negate());
+                    } else {
+                        world.setGravity(GRAVITY);
                     }
                 }
             }, 0L, (long) (DT * 1000.0), TimeUnit.MILLISECONDS);
