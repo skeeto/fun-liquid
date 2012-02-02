@@ -47,6 +47,7 @@ public class Bottle extends Observable implements Runnable {
     private static final float BALL_RESTITUTION = 0.4f;
 
     @Getter private final World world;
+    private boolean running = false;
     private CountDownLatch latch = new CountDownLatch(1);
 
     /**
@@ -68,6 +69,7 @@ public class Bottle extends Observable implements Runnable {
 
     @Override
     public final void run() {
+        running = true;
         val exec = Executors.newSingleThreadScheduledExecutor();
         exec.scheduleAtFixedRate(new Runnable() {
                 public void run() {
@@ -97,6 +99,8 @@ public class Bottle extends Observable implements Runnable {
         } catch (java.security.AccessControlException e) {
             /* Can't call shutdown() inside the security sandbox. */
             log.info("looks like we're an applet, can't shutdown");
+        } finally {
+            running = false;
         }
     }
 
@@ -107,6 +111,14 @@ public class Bottle extends Observable implements Runnable {
         val old = latch;
         latch = new CountDownLatch(1);
         old.countDown();
+    }
+
+    /**
+     * Return true if the simulation is running.
+     * @return true if the simulation is running
+     */
+    public final boolean isRunning() {
+        return running;
     }
 
     /**
