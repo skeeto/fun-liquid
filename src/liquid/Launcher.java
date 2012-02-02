@@ -3,10 +3,8 @@ package liquid;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
-import java.lang.InterruptedException;
 import java.util.Random;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
@@ -23,13 +21,17 @@ import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
 
+/**
+ * Sets up the environment and drives the simulation forward.
+ */
 @Log
-public class Launcher {
+public final class Launcher {
 
     /* Solver */
-    private static final float DT = 1f / 30f; // seconds
+    private static final int FPS = 30;
     private static final int V_ITERATIONS = 8;
     private static final int P_ITERATIONS = 3;
+    private static final double MILLIS = 1000.0;
 
     /* World */
     private static final float WIDTH = 50f;
@@ -37,7 +39,7 @@ public class Launcher {
     private static final float THICKNESS = 1f;
     private static final Vec2 GRAVITY = new Vec2(0, -20f);
     private static final Rectangle2D VIEW =
-        new Rectangle2D.Float(WIDTH / -2, HEIGHT / -2, WIDTH, HEIGHT);
+        new Rectangle2D.Float(-WIDTH / 2, -HEIGHT / 2, WIDTH, HEIGHT);
     private static final long FLIP_RATE = 5000L;
 
     /* Balls */
@@ -47,7 +49,17 @@ public class Launcher {
     private static final float BALL_FRICTION = 0.1f;
     private static final float BALL_RESTITUTION = 0.4f;
 
-    public static void main(String[] args) {
+    /**
+     * Private constructor.
+     */
+    private Launcher() {
+    }
+
+    /**
+     * The main method, application entry point.
+     * @param args  command line arguments
+     */
+    public static void main(final String[] args) {
         /* Fix for poor OpenJDK performance. */
         System.setProperty("sun.java2d.pmoffscreen", "false");
 
@@ -63,13 +75,13 @@ public class Launcher {
         val options = new JPanel();
         val threshold = new JCheckBox("Threshold", true);
         threshold.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
+                public void actionPerformed(final ActionEvent e) {
                     viewer.setThreshold(threshold.isSelected());
                 }
             });
         val blur = new JCheckBox("Blur", true);
         blur.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
+                public void actionPerformed(final ActionEvent e) {
                     viewer.setBlur(blur.isSelected());
                     threshold.setEnabled(blur.isSelected());
                 }
@@ -96,7 +108,7 @@ public class Launcher {
         val exec = Executors.newSingleThreadScheduledExecutor();
         exec.scheduleAtFixedRate(new Runnable() {
                 public void run() {
-                    world.step(DT, V_ITERATIONS, P_ITERATIONS);
+                    world.step(1f / FPS, V_ITERATIONS, P_ITERATIONS);
                     viewer.repaint();
                     if (System.currentTimeMillis() / FLIP_RATE % 2 == 0) {
                         world.setGravity(GRAVITY.negate());
@@ -104,10 +116,14 @@ public class Launcher {
                         world.setGravity(GRAVITY);
                     }
                 }
-            }, 0L, (long) (DT * 1000.0), TimeUnit.MILLISECONDS);
+            }, 0L, (long) (MILLIS / FPS), TimeUnit.MILLISECONDS);
     }
 
-    private static void buildContainer(World world) {
+    /**
+     * Build the world container.
+     * @param world  the world to build the container in
+     */
+    private static void buildContainer(final World world) {
         BodyDef def = new BodyDef();
         PolygonShape box = new PolygonShape();
         Body side;
@@ -129,7 +145,14 @@ public class Launcher {
         world.createBody(def).createFixture(box, 0f);
     }
 
-    private static void addBall(World world, float x, float y) {
+    /**
+     * Add a new ball body to the world.
+     * @param world  the world to add the ball to
+     * @param x      the x-coordinate of the ball
+     * @param y      the y-coordinate of the ball
+     */
+    private static void addBall(final World world,
+                                final float x, final float y) {
         BodyDef def = new BodyDef();
         def.position = new Vec2(x, y);
         def.type = BodyType.DYNAMIC;

@@ -23,6 +23,9 @@ import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.World;
 
+/**
+ * Displays a view of a JBox2D world.
+ */
 public class Viewer extends JComponent {
 
     private static final Color BACKGROUND = Color.BLACK;
@@ -43,7 +46,12 @@ public class Viewer extends JComponent {
     private final Kernel vkernel;
     private final Kernel hkernel;
 
-    public Viewer(World world, Rectangle2D view) {
+    /**
+     * Create a display of a world at a given location.
+     * @param world  the world to be displayed
+     * @param view   a rectangle describing the section to be viewed
+     */
+    public Viewer(final World world, final Rectangle2D view) {
         this.world = world;
         this.view = view;
         Dimension size = new Dimension((int) (view.getWidth() * SCALE),
@@ -54,7 +62,7 @@ public class Viewer extends JComponent {
     }
 
     @Override
-    public void paintComponent(Graphics graphics) {
+    public final void paintComponent(final Graphics graphics) {
         Graphics2D g = (Graphics2D) graphics;
         if (!blur) {
             draw(g, getWidth(), getHeight(), true);
@@ -85,7 +93,15 @@ public class Viewer extends JComponent {
         }
     }
 
-    private void draw(Graphics2D g, int width, int height, boolean aa) {
+    /**
+     * Draw the world onto the given graphics.
+     * @param g       the graphics context to use
+     * @param width   width of the drawing context
+     * @param height  height of the drawing context
+     * @param aa      enable anti-aliasing
+     */
+    private void draw(final Graphics2D g, final int width, final int height,
+                      final boolean aa) {
         g.setColor(BACKGROUND);
         g.fillRect(0, 0, getWidth(), getHeight());
 
@@ -121,14 +137,28 @@ public class Viewer extends JComponent {
         }
     }
 
-    private void draw(Graphics2D g, Vec2 pos, CircleShape s) {
+    /**
+     * Draw a circle shape from the world.
+     * @param g    the graphics context to use
+     * @param pos  position of the shape
+     * @param s    the circle to be drawn
+     */
+    private void draw(final Graphics2D g, final Vec2 pos, final CircleShape s) {
         Ellipse2D circle = new Ellipse2D.Float(pos.x - s.m_radius,
                                                pos.y - s.m_radius,
                                                s.m_radius * 2, s.m_radius * 2);
         g.fill(circle);
     }
 
-    private void draw(Graphics2D g, Vec2 pos, float angle, PolygonShape s) {
+    /**
+     * Draw a polygon shape from the world.
+     * @param g      the graphics context to use
+     * @param pos    position of the shape
+     * @param angle  the rotation of the shape
+     * @param s      the polygon to be drawn
+     */
+    private void draw(final Graphics2D g, final Vec2 pos,
+                      final float angle, final PolygonShape s) {
         Path2D path = new Path2D.Float();
         Vec2 first = s.getVertex(0);
         path.moveTo(first.x, first.y);
@@ -145,13 +175,16 @@ public class Viewer extends JComponent {
 
     /**
      * Make a blur kernel.
+     * @param size      the size of the kernel
+     * @param vertical  make the kernel vertical or horizontal
+     * @return the specified kernel
      */
-    private static Kernel makeKernel(int size, boolean vertical) {
+    private static Kernel makeKernel(final int size, final boolean vertical) {
         float radius = size;
         int rows = size * 2 + 1;
         float[] matrix = new float[rows];
         float sigma = radius / 3;
-        float sigma22 = 2 * sigma*sigma;
+        float sigma22 = 2 * sigma * sigma;
         float sigmaPi2 = 2 * (float) Math.PI * sigma;
         float sqrtSigmaPi2 = (float) Math.sqrt(sigmaPi2);
         float radius2 = radius * radius;
@@ -179,14 +212,18 @@ public class Viewer extends JComponent {
         }
     }
 
-    private void threshold(BufferedImage im) {
+    /**
+     * Threshold an image.
+     * @param im  the image to be thresholded
+     */
+    private void threshold(final BufferedImage im) {
         for (int i = 0; i < im.getWidth(); i++) {
             for (int j = 0; j < im.getHeight(); j++) {
                 Color c = new Color(im.getRGB(i, j));
                 if (c.getRed() + c.getGreen() + c.getBlue() > THRESHOLD) {
-                    im.setRGB(i, j, 0x00ffffff);
+                    im.setRGB(i, j, FOREGROUND.getRGB());
                 } else {
-                    im.setRGB(i, j, 0x00000000);
+                    im.setRGB(i, j, BACKGROUND.getRGB());
                 }
             }
         }
