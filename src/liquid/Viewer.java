@@ -16,7 +16,6 @@ import java.awt.image.Kernel;
 import java.util.Observable;
 import java.util.Observer;
 import javax.swing.JComponent;
-import lombok.Setter;
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.collision.shapes.Shape;
@@ -42,8 +41,8 @@ public class Viewer extends JComponent implements Observer {
     private final World world;
     private final Rectangle2D view;
 
-    @Setter private boolean blur = true;
-    @Setter private boolean threshold = true;
+    private boolean blur = true;
+    private boolean threshold = true;
 
     private final Kernel vkernel;
     private final Kernel hkernel;
@@ -65,6 +64,24 @@ public class Viewer extends JComponent implements Observer {
 
     @Override
     public final void update(final Observable o, final Object arg) {
+        repaint();
+    }
+
+    /**
+     * Turn blurring on or off.
+     * @param set  the new value
+     */
+    public final void setBlur(final boolean set) {
+        blur = set;
+        repaint();
+    }
+
+    /**
+     * Turn thresholding on or off.
+     * @param set  the new value
+     */
+    public final void setThreshold(final boolean set) {
+        threshold = set;
         repaint();
     }
 
