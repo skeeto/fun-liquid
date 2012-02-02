@@ -59,7 +59,7 @@ public final class Controls extends JPanel {
                         bottle.stop();
                         pause.setText("Play");
                     } else {
-                        new Thread(bottle).start();
+                        bottle.start();
                         pause.setText("Pause");
                     }
                 }

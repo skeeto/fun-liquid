@@ -34,6 +34,6 @@ public final class Launcher {
         frame.setResizable(false);
         frame.pack();
         frame.setVisible(true);
-        bottle.run();
+        bottle.start();
     }
 }

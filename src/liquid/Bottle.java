@@ -3,12 +3,11 @@ package liquid;
 import java.awt.geom.Rectangle2D;
 import java.util.Observable;
 import java.util.Random;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import lombok.Getter;
 import lombok.extern.java.Log;
-import lombok.val;
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
@@ -22,7 +21,7 @@ import org.jbox2d.dynamics.World;
  * A simulated bottle containing a chunky liquid (large solid particles).
  */
 @Log
-public class Bottle extends Observable implements Runnable {
+public class Bottle extends Observable {
 
     /* Solver */
     private static final int FPS = 30;
@@ -48,7 +47,8 @@ public class Bottle extends Observable implements Runnable {
 
     @Getter private final World world;
     private boolean running = false;
-    private CountDownLatch latch = new CountDownLatch(1);
+    private static final ScheduledExecutorService EXEC =
+        Executors.newSingleThreadScheduledExecutor();
 
     /**
      * Create a new bottle.
@@ -65,52 +65,34 @@ public class Bottle extends Observable implements Runnable {
                     (rng.nextFloat() - 0.5f) * (WIDTH - BALL_RADIUS),
                     (rng.nextFloat() - 0.5f) * (HEIGHT - BALL_RADIUS));
         }
-    }
-
-    @Override
-    public final void run() {
-        running = true;
-        val exec = Executors.newSingleThreadScheduledExecutor();
-        exec.scheduleAtFixedRate(new Runnable() {
+        EXEC.scheduleAtFixedRate(new Runnable() {
                 public void run() {
-                    world.step(1f / FPS, V_ITERATIONS, P_ITERATIONS);
-                    setChanged();
-                    notifyObservers();
-                    if (System.currentTimeMillis() / FLIP_RATE % 2 == 0) {
-                        world.setGravity(GRAVITY.negate());
-                    } else {
-                        world.setGravity(GRAVITY);
+                    if (running) {
+                        world.step(1f / FPS, V_ITERATIONS, P_ITERATIONS);
+                        setChanged();
+                        notifyObservers();
+                        if (System.currentTimeMillis() / FLIP_RATE % 2 == 0) {
+                            world.setGravity(GRAVITY.negate());
+                        } else {
+                            world.setGravity(GRAVITY);
+                        }
                     }
                 }
             }, 0L, (long) (MILLIS / FPS), TimeUnit.MILLISECONDS);
-        try {
-            /* Block the current thread, since we're a Runnable. */
-            latch.await();
-        } catch (InterruptedException e) {
-            log.info("simulation interrupted");
-        }
-        try {
-            /* Stop the executor. */
-            exec.shutdown();
-            exec.awaitTermination(1L, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            exec.shutdownNow();
-            log.info("termination interrupted");
-        } catch (java.security.AccessControlException e) {
-            /* Can't call shutdown() inside the security sandbox. */
-            log.info("looks like we're an applet, can't shutdown");
-        } finally {
-            running = false;
-        }
+    }
+
+    /**
+     * Run the simulation.
+     */
+    public final void start() {
+        running = true;
     }
 
     /**
      * Stop the simulation, which can be restarted again.
      */
     public final void stop() {
-        val old = latch;
-        latch = new CountDownLatch(1);
-        old.countDown();
+        running = false;
     }
 
     /**

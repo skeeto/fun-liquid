@@ -25,7 +25,7 @@ public class LiquidApplet extends JApplet {
 
     @Override
     public final void start() {
-        new Thread(bottle).start();
+        bottle.start();
     }
 
     @Override
