@@ -36,7 +36,7 @@ public class Bottle extends Observable {
     private static final Vec2 GRAVITY = new Vec2(0, -60f);
     private static final Rectangle2D VIEW =
         new Rectangle2D.Float(-WIDTH / 2, -HEIGHT / 2, WIDTH, HEIGHT);
-    private static final long FLIP_RATE = 3000L;
+    private static final long FLIP_RATE = 3500L;
 
     /* Balls */
     private static final int BALLS = 150;
@@ -44,6 +44,9 @@ public class Bottle extends Observable {
     private static final float BALL_DENSITY = 1f;
     private static final float BALL_FRICTION = 0f;
     private static final float BALL_RESTITUTION = 0.4f;
+
+    private static final float SPIKE_THICKNESS = 12f;
+    private static final float SPIKE_EXTENT = 20f;
 
     @Getter private final World world;
     private boolean running = false;
@@ -64,6 +67,8 @@ public class Bottle extends Observable {
             addBall((rng.nextFloat() - 0.5f) * (WIDTH - BALL_RADIUS),
                     (rng.nextFloat() - 0.5f) * (HEIGHT - BALL_RADIUS));
         }
+        addSpike(SPIKE_EXTENT, 0, 1);
+        addSpike(-SPIKE_EXTENT, 0, -1);
         EXEC.scheduleAtFixedRate(new Runnable() {
                 public void run() {
                     if (running) {
@@ -152,5 +157,28 @@ public class Bottle extends Observable {
         mass.friction = BALL_FRICTION;
         mass.restitution = BALL_RESTITUTION;
         world.createBody(def).createFixture(mass);
+    }
+
+    /**
+     * Add a static spike to the bottle.
+     * @param x    x-position of the point
+     * @param y    y-position of the point
+     * @param dir  direction of the point
+     */
+    private void addSpike(final float x, final float y, final int dir) {
+        BodyDef def = new BodyDef();
+        def.position = new Vec2(x, y);
+        PolygonShape shape = new PolygonShape();
+        Vec2[] vecs = new Vec2[3];
+        int side = 1;
+        vecs[0] = new Vec2(dir * WIDTH / 2 - x, dir * SPIKE_THICKNESS / 2f);
+        vecs[1] = new Vec2(0, 0);
+        vecs[2] = new Vec2(dir * WIDTH / 2 - x, dir * -SPIKE_THICKNESS / 2f);
+        shape.set(vecs, vecs.length);
+        FixtureDef fix = new FixtureDef();
+        fix.shape = shape;
+        fix.density = 0f;
+        fix.friction = 0f;
+        world.createBody(def).createFixture(fix);
     }
 }
