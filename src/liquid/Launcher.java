@@ -30,10 +30,10 @@ public class Launcher {
     private static final float WIDTH = 50f;
     private static final float HEIGHT = 70f;
     private static final float THICKNESS = 1f;
-    private static final Vec2 GRAVITY = new Vec2(0, -15f);
+    private static final Vec2 GRAVITY = new Vec2(0, -25f);
     private static final Rectangle2D VIEW =
         new Rectangle2D.Float(WIDTH / -2, HEIGHT / -2, WIDTH, HEIGHT);
-    private static final long FLIP_RATE = 4500L;
+    private static final long FLIP_RATE = 5000L;
 
     /* Balls */
     private static final int BALLS = 150;
