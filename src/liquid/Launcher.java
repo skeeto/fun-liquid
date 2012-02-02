@@ -3,8 +3,12 @@ package liquid;
 import java.awt.geom.Rectangle2D;
 import java.lang.InterruptedException;
 import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import javax.swing.JFrame;
 import lombok.extern.java.Log;
+import lombok.val;
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
@@ -37,8 +41,8 @@ public class Launcher {
         /* Fix for poor OpenJDK performance. */
         System.setProperty("sun.java2d.pmoffscreen", "false");
 
-        World world = new World(GRAVITY, true);
-        Viewer viewer = new Viewer(world, VIEW);
+        val world = new World(GRAVITY, true);
+        val viewer = new Viewer(world, VIEW);
         JFrame frame = new JFrame("Fun Liquid");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.add(viewer);
@@ -57,16 +61,15 @@ public class Launcher {
                     (rng.nextFloat() - 0.5f) * HEIGHT);
         }
 
-        final int dtms = (int) (DT * 1000.0);
-        while (true) {
-            world.step(DT, V_ITERATIONS, P_ITERATIONS);
-            viewer.repaint();
-            try {
-                Thread.sleep(dtms);
-            } catch (InterruptedException e) {
-                log.warning("interrupted");
-            }
-        }
+        val exec = Executors.newSingleThreadScheduledExecutor();
+        exec.scheduleAtFixedRate(new Runnable() {
+                public void run() {
+                    while (true) {
+                        world.step(DT, V_ITERATIONS, P_ITERATIONS);
+                        viewer.repaint();
+                    }
+                }
+            }, 0L, (long) (DT * 1000.0), TimeUnit.MILLISECONDS);
     }
 
     private static void buildContainer(World world) {
