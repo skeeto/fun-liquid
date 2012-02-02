@@ -33,14 +33,14 @@ public class Launcher {
     private static final Vec2 GRAVITY = new Vec2(0, -15f);
     private static final Rectangle2D VIEW =
         new Rectangle2D.Float(WIDTH / -2, HEIGHT / -2, WIDTH, HEIGHT);
-    private static final long FLIP_RATE = 3500L;
+    private static final long FLIP_RATE = 4500L;
 
     /* Balls */
-    private static final int BALLS = 100;
+    private static final int BALLS = 150;
     private static final float BALL_RADIUS = 0.75f;
     private static final float BALL_DENSITY = 1f;
     private static final float BALL_FRICTION = 0.1f;
-    private static final float BALL_RESTITUTION = 0.6f;
+    private static final float BALL_RESTITUTION = 0.4f;
 
     public static void main(String[] args) {
         /* Fix for poor OpenJDK performance. */
