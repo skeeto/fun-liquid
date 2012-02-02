@@ -33,6 +33,7 @@ public class Launcher {
     private static final Vec2 GRAVITY = new Vec2(0, -0.5f);
     private static final Rectangle2D VIEW =
         new Rectangle2D.Float(WIDTH / -2, HEIGHT / -2, WIDTH, HEIGHT);
+    private static final long FLIP_RATE = 1500L;
 
     /* Balls */
     private static final int BALLS = 100;
@@ -44,7 +45,7 @@ public class Launcher {
         /* Fix for poor OpenJDK performance. */
         System.setProperty("sun.java2d.pmoffscreen", "false");
 
-        val world = new World(GRAVITY, true);
+        val world = new World(GRAVITY, false);
         val viewer = new Viewer(world, VIEW);
         JFrame frame = new JFrame("Fun Liquid");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -70,6 +71,11 @@ public class Launcher {
                     while (true) {
                         world.step(DT, V_ITERATIONS, P_ITERATIONS);
                         viewer.repaint();
+                        if (System.currentTimeMillis() / FLIP_RATE % 2 == 0) {
+                            world.setGravity(GRAVITY.negate());
+                        } else {
+                            world.setGravity(GRAVITY);
+                        }
                     }
                 }
             }, 0L, (long) (DT * 1000.0), TimeUnit.MILLISECONDS);
