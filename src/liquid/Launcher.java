@@ -37,6 +37,7 @@ public class Launcher {
 
     /* Balls */
     private static final int BALLS = 100;
+    private static final float BALL_RADIUS = 0.75f;
     private static final float BALL_DENSITY = 1f;
     private static final float BALL_FRICTION = 0.1f;
     private static final float BALL_RESTITUTION = 0.6f;
@@ -61,8 +62,8 @@ public class Launcher {
         Random rng = new Random();
         for (int i = 0; i < BALLS; i++) {
             addBall(world,
-                    (rng.nextFloat() - 0.5f) * WIDTH,
-                    (rng.nextFloat() - 0.5f) * HEIGHT);
+                    (rng.nextFloat() - 0.5f) * (WIDTH - BALL_RADIUS),
+                    (rng.nextFloat() - 0.5f) * (HEIGHT - BALL_RADIUS));
         }
 
         val exec = Executors.newSingleThreadScheduledExecutor();
@@ -108,7 +109,7 @@ public class Launcher {
         def.position = new Vec2(x, y);
         def.type = BodyType.DYNAMIC;
         CircleShape circle = new CircleShape();
-        circle.m_radius = 1f;
+        circle.m_radius = BALL_RADIUS;
         FixtureDef mass = new FixtureDef();
         mass.shape = circle;
         mass.density = BALL_DENSITY;
