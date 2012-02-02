@@ -14,6 +14,7 @@ import java.awt.image.BufferedImageOp;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
 import javax.swing.JComponent;
+import lombok.Setter;
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.collision.shapes.Shape;
@@ -36,6 +37,9 @@ public class Viewer extends JComponent {
     private final World world;
     private final Rectangle2D view;
 
+    @Setter private boolean blur = true;
+    @Setter private boolean threshold = true;
+
     private final Kernel vkernel;
     private final Kernel hkernel;
 
@@ -52,6 +56,11 @@ public class Viewer extends JComponent {
     @Override
     public void paintComponent(Graphics graphics) {
         Graphics2D g = (Graphics2D) graphics;
+        if (!blur) {
+            draw(g, getWidth(), getHeight(), true);
+            return;
+        }
+
         Dimension size = getPreferredSize();
         BufferedImage work;
         work = new BufferedImage(size.width + KERNEL_SIZE * 2,
@@ -62,16 +71,18 @@ public class Viewer extends JComponent {
         wg.dispose();
 
         /* Blur. */
-        BufferedImageOp op = new ConvolveOp(vkernel);
-        BufferedImage blur = op.filter(work, null);
-        op = new ConvolveOp(hkernel);
-        blur = op.filter(blur, null);
-
-        /* Threshold. */
-        threshold(blur);
-
-        /* Draw the result. */
-        g.drawImage(blur, -KERNEL_SIZE, -KERNEL_SIZE, null);
+        if (blur) {
+            BufferedImageOp op = new ConvolveOp(vkernel);
+            BufferedImage conv = op.filter(work, null);
+            op = new ConvolveOp(hkernel);
+            conv = op.filter(conv, null);
+            /* Threshold. */
+            if (threshold) {
+                threshold(conv);
+            }
+            /* Draw the result. */
+            g.drawImage(conv, -KERNEL_SIZE, -KERNEL_SIZE, null);
+        }
     }
 
     private void draw(Graphics2D g, int width, int height, boolean aa) {
