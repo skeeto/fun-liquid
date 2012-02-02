@@ -36,7 +36,8 @@ public class Viewer extends JComponent {
     private final World world;
     private final Rectangle2D view;
 
-    private final Kernel kernel;
+    private final Kernel vkernel;
+    private final Kernel hkernel;
 
     public Viewer(World world, Rectangle2D view) {
         this.world = world;
@@ -44,7 +45,8 @@ public class Viewer extends JComponent {
         Dimension size = new Dimension((int) (view.getWidth() * SCALE),
                                        (int) (view.getHeight() * SCALE));
         setPreferredSize(size);
-        kernel = makeKernel(KERNEL_SIZE);
+        vkernel = makeKernel(KERNEL_SIZE, true);
+        hkernel = makeKernel(KERNEL_SIZE, false);
     }
 
     @Override
@@ -60,8 +62,10 @@ public class Viewer extends JComponent {
         wg.dispose();
 
         /* Blur. */
-        BufferedImageOp op = new ConvolveOp(kernel);
+        BufferedImageOp op = new ConvolveOp(vkernel);
         BufferedImage blur = op.filter(work, null);
+        op = new ConvolveOp(hkernel);
+        blur = op.filter(blur, null);
 
         /* Threshold. */
         threshold(blur);
@@ -129,15 +133,39 @@ public class Viewer extends JComponent {
     }
 
     /**
-     * Make a flat blur kernel.
+     * Make a blur kernel.
      */
-    private static Kernel makeKernel(int size) {
-        float base = size * size;
-        float[] matrix = new float[size * size];
-        for (int i = 0; i < size * size; i++) {
-                matrix[i] = 1.0f / base;
+    private static Kernel makeKernel(int size, boolean vertical) {
+        float radius = size;
+        int rows = size * 2 + 1;
+        float[] matrix = new float[rows];
+        float sigma = radius / 3;
+        float sigma22 = 2 * sigma*sigma;
+        float sigmaPi2 = 2 * (float) Math.PI * sigma;
+        float sqrtSigmaPi2 = (float) Math.sqrt(sigmaPi2);
+        float radius2 = radius * radius;
+        float total = 0;
+        int index = 0;
+        for (int row = -size; row <= size; row++) {
+            float distance = row * row;
+            if (distance > radius2) {
+                matrix[index] = 0;
+            } else {
+                matrix[index] = (float) Math.exp(-(distance) / sigma22)
+                    / sqrtSigmaPi2;
+            }
+            total += matrix[index];
+            index++;
         }
-        return new Kernel(size, size, matrix);
+        for (int i = 0; i < rows; i++) {
+            matrix[i] /= total;
+        }
+
+        if (vertical) {
+            return new Kernel(1, rows, matrix);
+        } else {
+            return new Kernel(rows, 1, matrix);
+        }
     }
 
     private void threshold(BufferedImage im) {
