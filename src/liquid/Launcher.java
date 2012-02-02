@@ -1,12 +1,17 @@
 package liquid;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
 import java.lang.InterruptedException;
 import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import javax.swing.BoxLayout;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import lombok.extern.java.Log;
 import lombok.val;
 import org.jbox2d.collision.shapes.CircleShape;
@@ -50,7 +55,29 @@ public class Launcher {
         val viewer = new Viewer(world, VIEW);
         JFrame frame = new JFrame("Fun Liquid");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        val layout = new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS);
+        frame.setLayout(layout);
         frame.add(viewer);
+
+        /* Options panel. */
+        val options = new JPanel();
+        val threshold = new JCheckBox("Threshold", true);
+        threshold.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    viewer.setThreshold(threshold.isSelected());
+                }
+            });
+        val blur = new JCheckBox("Blur", true);
+        blur.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    viewer.setBlur(blur.isSelected());
+                    threshold.setEnabled(blur.isSelected());
+                }
+            });
+        options.add(blur);
+        options.add(threshold);
+        frame.add(options);
+
         frame.setResizable(false);
         frame.pack();
         frame.setVisible(true);
