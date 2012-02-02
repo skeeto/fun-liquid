@@ -15,6 +15,7 @@ import lombok.val;
 public final class Controls extends JPanel {
 
     private static final long serialVersionUID = 1L;
+    private static final int GAP = 10;
 
     private final Bottle bottle;
     private final Viewer viewer;
@@ -27,6 +28,12 @@ public final class Controls extends JPanel {
     public Controls(final Bottle bottle, final Viewer viewer) {
         this.bottle = bottle;
         this.viewer = viewer;
+
+        val layout = new GridLayout(2, 2);
+        layout.setHgap(GAP);
+        layout.setVgap(GAP);
+        setLayout(layout);
+        setBorder(BorderFactory.createEmptyBorder(0, GAP, GAP, GAP));
 
         val threshold = new JCheckBox("Threshold", true);
         threshold.addActionListener(new ActionListener() {
