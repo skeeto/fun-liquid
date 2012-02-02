@@ -50,6 +50,12 @@
       controls to see the components of this process.
     </p>
     <p>
+      The most computationally intensive step is blurring the
+      raster. Convolution is expensive, O(n^2), and it's being done by
+      the CPU here, rather than the GPU. To run at full speed, you
+      need a nice computer.
+    </p>
+    <p>
       See the <a href="https://github.com/skeeto/fun-liquid">Git
       repository</a> for full source code listing.
     </p>
