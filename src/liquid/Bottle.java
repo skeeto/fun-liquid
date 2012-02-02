@@ -3,9 +3,11 @@ package liquid;
 import java.awt.geom.Rectangle2D;
 import java.util.Observable;
 import java.util.Random;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import lombok.Getter;
+import lombok.extern.java.Log;
 import lombok.val;
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
@@ -19,6 +21,7 @@ import org.jbox2d.dynamics.World;
 /**
  * A simulated bottle containing a chunky liquid (large solid particles).
  */
+@Log
 public class Bottle extends Observable implements Runnable {
 
     /* Solver */
@@ -44,6 +47,7 @@ public class Bottle extends Observable implements Runnable {
     private static final float BALL_RESTITUTION = 0.4f;
 
     @Getter private final World world;
+    private CountDownLatch latch = new CountDownLatch(1);
 
     /**
      * Create a new bottle.
@@ -77,6 +81,29 @@ public class Bottle extends Observable implements Runnable {
                     }
                 }
             }, 0L, (long) (MILLIS / FPS), TimeUnit.MILLISECONDS);
+        try {
+            /* Block the current thread, since we're a Runnable. */
+            latch.await();
+        } catch (InterruptedException e) {
+            log.info("simulation interrupted");
+        }
+        try {
+            /* Stop the executor. */
+            exec.shutdown();
+            exec.awaitTermination(1L, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            exec.shutdownNow();
+            log.info("termination interrupted");
+        }
+    }
+
+    /**
+     * Stop the simulation, which can be restarted again.
+     */
+    public final void stop() {
+        val old = latch;
+        latch = new CountDownLatch(1);
+        old.countDown();
     }
 
     /**
