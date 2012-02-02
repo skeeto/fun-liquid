@@ -33,16 +33,16 @@ public class Bottle extends Observable {
     private static final float WIDTH = 50f;
     private static final float HEIGHT = 70f;
     private static final float THICKNESS = 1f;
-    private static final Vec2 GRAVITY = new Vec2(0, -20f);
+    private static final Vec2 GRAVITY = new Vec2(0, -60f);
     private static final Rectangle2D VIEW =
         new Rectangle2D.Float(-WIDTH / 2, -HEIGHT / 2, WIDTH, HEIGHT);
-    private static final long FLIP_RATE = 5000L;
+    private static final long FLIP_RATE = 3000L;
 
     /* Balls */
     private static final int BALLS = 150;
     private static final float BALL_RADIUS = 0.75f;
     private static final float BALL_DENSITY = 1f;
-    private static final float BALL_FRICTION = 0.1f;
+    private static final float BALL_FRICTION = 0f;
     private static final float BALL_RESTITUTION = 0.4f;
 
     @Getter private final World world;
