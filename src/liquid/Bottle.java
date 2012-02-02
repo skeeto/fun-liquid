@@ -32,7 +32,7 @@ public class Bottle extends Observable {
     /* World */
     private static final float WIDTH = 50f;
     private static final float HEIGHT = 70f;
-    private static final float THICKNESS = 1f;
+    private static final float THICKNESS = 0.1f;
     private static final Vec2 GRAVITY = new Vec2(0, -60f);
     private static final Rectangle2D VIEW =
         new Rectangle2D.Float(-WIDTH / 2, -HEIGHT / 2, WIDTH, HEIGHT);
