@@ -56,13 +56,12 @@ public class Bottle extends Observable {
     public Bottle() {
         world = new World(GRAVITY, false);
         /* Set up the containment box. */
-        buildContainer(world);
+        buildContainer();
 
         /* Add a ball. */
         Random rng = new Random();
         for (int i = 0; i < BALLS; i++) {
-            addBall(world,
-                    (rng.nextFloat() - 0.5f) * (WIDTH - BALL_RADIUS),
+            addBall((rng.nextFloat() - 0.5f) * (WIDTH - BALL_RADIUS),
                     (rng.nextFloat() - 0.5f) * (HEIGHT - BALL_RADIUS));
         }
         EXEC.scheduleAtFixedRate(new Runnable() {
@@ -113,9 +112,8 @@ public class Bottle extends Observable {
 
     /**
      * Build the world container.
-     * @param world  the world to build the container in
      */
-    private static void buildContainer(final World world) {
+    private void buildContainer() {
         BodyDef def = new BodyDef();
         PolygonShape box = new PolygonShape();
         Body side;
@@ -139,12 +137,10 @@ public class Bottle extends Observable {
 
     /**
      * Add a new ball body to the world.
-     * @param world  the world to add the ball to
      * @param x      the x-coordinate of the ball
      * @param y      the y-coordinate of the ball
      */
-    private static void addBall(final World world,
-                                final float x, final float y) {
+    private void addBall(final float x, final float y) {
         BodyDef def = new BodyDef();
         def.position = new Vec2(x, y);
         def.type = BodyType.DYNAMIC;
