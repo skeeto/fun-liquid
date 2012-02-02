@@ -21,6 +21,7 @@ import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.collision.shapes.Shape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
+import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.World;
 
@@ -31,6 +32,7 @@ public class Viewer extends JComponent implements Observer {
 
     private static final Color BACKGROUND = Color.BLACK;
     private static final Color FOREGROUND = Color.WHITE;
+    private static final Color STATIC     = Color.GRAY;
     private static final int KERNEL_SIZE = 14;
     private static final int THRESHOLD = 0x2f * 3;
 
@@ -89,21 +91,24 @@ public class Viewer extends JComponent implements Observer {
     public final void paintComponent(final Graphics graphics) {
         Graphics2D g = (Graphics2D) graphics;
         if (!blur) {
-            draw(g, getWidth(), getHeight(), true);
-            return;
-        }
+            g.setColor(BACKGROUND);
+            g.fillRect(0, 0, getWidth(), getHeight());
+            draw(g, getWidth(), getHeight(), true,
+                 BodyType.DYNAMIC, FOREGROUND);
+        } else {
+            Dimension size = getPreferredSize();
+            BufferedImage work;
+            work = new BufferedImage(size.width + KERNEL_SIZE * 2,
+                                     size.height + KERNEL_SIZE * 2,
+                                     BufferedImage.TYPE_INT_RGB);
+            Graphics2D wg = work.createGraphics();
+            wg.setColor(BACKGROUND);
+            wg.fillRect(0, 0, work.getWidth(), work.getHeight());
+            draw(wg, work.getWidth(), work.getHeight(), false,
+                 BodyType.DYNAMIC, FOREGROUND);
+            wg.dispose();
 
-        Dimension size = getPreferredSize();
-        BufferedImage work;
-        work = new BufferedImage(size.width + KERNEL_SIZE * 2,
-                                 size.height + KERNEL_SIZE * 2,
-                                 BufferedImage.TYPE_INT_RGB);
-        Graphics2D wg = work.createGraphics();
-        draw(wg, work.getWidth(), work.getHeight(), false);
-        wg.dispose();
-
-        /* Blur. */
-        if (blur) {
+            /* Blur. */
             BufferedImageOp op = new ConvolveOp(vkernel);
             BufferedImage conv = op.filter(work, null);
             op = new ConvolveOp(hkernel);
@@ -115,6 +120,8 @@ public class Viewer extends JComponent implements Observer {
             /* Draw the result. */
             g.drawImage(conv, -KERNEL_SIZE, -KERNEL_SIZE, null);
         }
+        draw(g, getWidth(), getHeight(), true,
+             BodyType.STATIC, STATIC);
     }
 
     /**
@@ -123,12 +130,12 @@ public class Viewer extends JComponent implements Observer {
      * @param width   width of the drawing context
      * @param height  height of the drawing context
      * @param aa      enable anti-aliasing
+     * @param type    the type of body to draw
+     * @param color   the color to draw the bodies
      */
     private void draw(final Graphics2D g, final int width, final int height,
-                      final boolean aa) {
-        g.setColor(BACKGROUND);
-        g.fillRect(0, 0, getWidth(), getHeight());
-
+                      final boolean aa,
+                      final BodyType type, final Color color) {
         /* Set up coordinate system. */
         g.translate(width / 2, height / 2);
         g.scale(SCALE, -SCALE);
@@ -140,13 +147,13 @@ public class Viewer extends JComponent implements Observer {
         }
 
         /* Draw each body. */
-        g.setColor(FOREGROUND);
+        g.setColor(color);
         Body body = world.getBodyList();
         while (body != null) {
             Vec2 pos = body.getPosition();
             float angle = body.getAngle();
             Fixture fixture = body.getFixtureList();
-            while (fixture != null) {
+            while (body.m_type == type && fixture != null) {
                 Shape shape = fixture.getShape();
                 if (shape instanceof CircleShape) {
                     draw(g, pos, (CircleShape) shape);
