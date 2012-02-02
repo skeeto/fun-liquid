@@ -54,8 +54,8 @@ public class Viewer extends JComponent {
         Graphics2D g = (Graphics2D) graphics;
         Dimension size = getPreferredSize();
         BufferedImage work;
-        work = new BufferedImage(size.width + KERNEL_SIZE,
-                                 size.height + KERNEL_SIZE,
+        work = new BufferedImage(size.width + KERNEL_SIZE * 2,
+                                 size.height + KERNEL_SIZE * 2,
                                  BufferedImage.TYPE_INT_RGB);
         Graphics2D wg = work.createGraphics();
         draw(wg, work.getWidth(), work.getHeight(), false);
@@ -71,7 +71,7 @@ public class Viewer extends JComponent {
         threshold(blur);
 
         /* Draw the result. */
-        g.drawImage(blur, -KERNEL_SIZE / 2, -KERNEL_SIZE / 2, null);
+        g.drawImage(blur, -KERNEL_SIZE, -KERNEL_SIZE, null);
     }
 
     private void draw(Graphics2D g, int width, int height, boolean aa) {
