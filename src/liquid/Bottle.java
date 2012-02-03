@@ -36,7 +36,7 @@ public class Bottle extends Observable {
     private static final Vec2 GRAVITY = new Vec2(0, -60f);
     private static final Rectangle2D VIEW =
         new Rectangle2D.Float(-WIDTH / 2, -HEIGHT / 2, WIDTH, HEIGHT);
-    private static final long FLIP_RATE = 3500L;
+    private static final double FLIP_RATE = 3.5; // seconds
 
     /* Balls */
     private static final int BALLS = 400;
@@ -49,6 +49,7 @@ public class Bottle extends Observable {
     private static final float SPIKE_EXTENT = 20f;
 
     @Getter private final World world;
+    @Getter private double time = 0; // World time
     private boolean running = false;
     private static final ScheduledExecutorService EXEC =
         Executors.newSingleThreadScheduledExecutor();
@@ -73,9 +74,10 @@ public class Bottle extends Observable {
                 public void run() {
                     if (running) {
                         world.step(1f / FPS, V_ITERATIONS, P_ITERATIONS);
+                        time += 1.0 / FPS;
                         setChanged();
                         notifyObservers();
-                        if (System.currentTimeMillis() / FLIP_RATE % 2 == 0) {
+                        if (Math.sin(time / FLIP_RATE * Math.PI) < 0) {
                             world.setGravity(GRAVITY.negate());
                         } else {
                             world.setGravity(GRAVITY);
