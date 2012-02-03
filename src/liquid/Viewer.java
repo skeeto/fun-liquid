@@ -8,7 +8,6 @@ import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 import java.awt.image.ConvolveOp;
@@ -16,6 +15,8 @@ import java.awt.image.Kernel;
 import java.util.Observable;
 import java.util.Observer;
 import javax.swing.JComponent;
+import lombok.Getter;
+import lombok.val;
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.collision.shapes.Shape;
@@ -23,7 +24,6 @@ import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.Fixture;
-import org.jbox2d.dynamics.World;
 
 /**
  * Displays a view of a JBox2D world.
@@ -40,8 +40,7 @@ public class Viewer extends JComponent implements Observer {
 
     private static final float SCALE = 5f;
 
-    private final World world;
-    private final Rectangle2D view;
+    @Getter private final Bottle bottle;
 
     private boolean blur = true;
     private boolean threshold = true;
@@ -54,8 +53,8 @@ public class Viewer extends JComponent implements Observer {
      * @param bottle  the bottle to be displayed
      */
     public Viewer(final Bottle bottle) {
-        this.world = bottle.getWorld();
-        this.view = bottle.getView();
+        this.bottle = bottle;
+        val view = bottle.getView();
         Dimension size = new Dimension((int) (view.getWidth() * SCALE),
                                        (int) (view.getHeight() * SCALE));
         setPreferredSize(size);
@@ -148,7 +147,7 @@ public class Viewer extends JComponent implements Observer {
 
         /* Draw each body. */
         g.setColor(color);
-        Body body = world.getBodyList();
+        Body body = bottle.getWorld().getBodyList();
         while (body != null) {
             Vec2 pos = body.getPosition();
             float angle = body.getAngle();
