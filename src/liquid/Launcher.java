@@ -5,11 +5,13 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
+import lombok.extern.java.Log;
 import lombok.val;
 
 /**
  * Sets up the environment and drives the simulation forward.
  */
+@Log
 public final class Launcher {
 
     @Parameter(names = "-record", description = "Record the simulation.")
@@ -26,8 +28,12 @@ public final class Launcher {
      * @param args  command line arguments
      */
     public static void main(final String[] args) {
-        /* Fix for poor OpenJDK performance. */
-        System.setProperty("sun.java2d.pmoffscreen", "false");
+        try {
+            /* Fix for poor OpenJDK performance. */
+            System.setProperty("sun.java2d.pmoffscreen", "false");
+        } catch (java.security.AccessControlException e) {
+            log.info("could not set sun.java2d.pmoffscreen");
+        }
 
         /* Check the command line arguments. */
         val options = new Launcher();
@@ -37,6 +43,8 @@ public final class Launcher {
             System.out.println("error: " + e.getMessage());
             new JCommander(options).usage();
             System.exit(-1);
+        } catch (java.security.AccessControlException e) {
+            log.warning("could not process arguments: " + e.getMessage());
         }
 
         /* Set up the frame. */

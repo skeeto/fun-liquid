@@ -40,7 +40,11 @@ public class Recorder implements Observer {
         try {
             ImageIO.write(image, "PNG", file);
         } catch (java.io.IOException e) {
-            log.severe("Could not write image " + file);
+            log.warning("failed to write " + file + ": " + e.getMessage());
+        } catch (java.security.AccessControlException e) {
+            log.warning("failed to write " + file + ": " + e.getMessage());
+            viewer.getBottle().deleteObserver(this);
+            log.info("unsubscribed");
         }
     }
 }
