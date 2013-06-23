@@ -1,30 +1,30 @@
 var B = B || {};
 
-B.Vec2         = Box2D.Common.Math.b2Vec2;
-B.BodyDef      = Box2D.Dynamics.b2BodyDef;
-B.Body         = Box2D.Dynamics.b2Body;
-B.FixtureDef   = Box2D.Dynamics.b2FixtureDef;
-B.Fixture      = Box2D.Dynamics.b2Fixture;
-B.World        = Box2D.Dynamics.b2World;
-B.MassData     = Box2D.Collision.Shapes.b2MassData;
-B.PolygonShape = Box2D.Collision.Shapes.b2PolygonShape;
-B.CircleShape  = Box2D.Collision.Shapes.b2CircleShape;
+B.Vec2         = Box2D.b2Vec2;
+B.BodyDef      = Box2D.b2BodyDef;
+B.Body         = Box2D.b2Body;
+B.FixtureDef   = Box2D.b2FixtureDef;
+B.Fixture      = Box2D.b2Fixture;
+B.World        = Box2D.b2World;
+B.MassData     = Box2D.b2MassData;
+B.PolygonShape = Box2D.b2PolygonShape;
+B.CircleShape  = Box2D.b2CircleShape;
 
-B.CircleShape.prototype.render = function(ctx, pos) {
-    ctx.beginPath();
-    ctx.arc(pos.x, pos.y, this.GetRadius(), 0, 2 * Math.PI);
-    ctx.fill();
-};
+B.b2_dynamicBody = Box2D.b2_dynamicBody;
 
-B.PolygonShape.prototype.render = function(ctx, pos) {
-    ctx.beginPath();
-    var verts = this.m_vertices;
-    ctx.moveTo(verts[0].x + pos.x, verts[0].y + pos.y);
-    for (var i = 1; i < verts.length; i++) {
-        ctx.lineTo(verts[i].x + pos.x, verts[i].y + pos.y);
+function createPolygonShape(verts) {
+    var shape = new Box2D.b2PolygonShape();
+    var buffer = Box2D.allocate(verts.length * 8, 'float', Box2D.ALLOC_STACK);
+    var offset = 0;
+    for (var i = 0; i < verts.length; i++) {
+        Box2D.setValue(buffer + (offset + 0), verts[i].get_x(), 'float'); // x
+        Box2D.setValue(buffer + (offset + 4), verts[i].get_y(), 'float'); // y
+        offset += 8;
     }
-    ctx.fill();
-};
+    var ptr_wrapped = Box2D.wrapPointer(buffer, Box2D.b2Vec2);
+    shape.Set(ptr_wrapped, verts.length);
+    return shape;
+}
 
 if (window.requestAnimationFrame == null) {
     window.requestAnimationFrame =
