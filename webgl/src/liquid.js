@@ -136,7 +136,7 @@ Bottle.prototype.step = function() {
 
 var bottle = null;
 window.addEventListener('load', function() {
-    var ctx = document.getElementById('world').getContext('2d');
+    var ctx = document.getElementById('display').getContext('2d');
     bottle = new Bottle(ctx);
     function render() {
         bottle.step();
