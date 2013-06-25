@@ -24,7 +24,7 @@ Bottle.BALL_FRICTION = 0;
 Bottle.BALL_RESTITUTION = 0.3;
 Bottle.GRAVITY = new B.Vec2(0, -20);
 Bottle.NGRAVITY = new B.Vec2(0, -Bottle.GRAVITY.get_y());
-Bottle.FLIP_RATE = 2;
+Bottle.FLIP_RATE = 3;
 Bottle.SPIKE_THICKNESS = 12;
 Bottle.SPIKE_EXTENT = 20;
 
