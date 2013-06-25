@@ -17,6 +17,7 @@ function Bottle(ctx) {
 
 Bottle.WIDTH = 50;
 Bottle.HEIGHT = 70;
+Bottle.FPS = 60;
 Bottle.BALL_COUNT = 150;
 Bottle.BALL_RADIUS = 1;
 Bottle.BALL_DENSITY = 1;
@@ -24,7 +25,7 @@ Bottle.BALL_FRICTION = 0;
 Bottle.BALL_RESTITUTION = 0.3;
 Bottle.GRAVITY = new B.Vec2(0, -20);
 Bottle.NGRAVITY = new B.Vec2(0, -Bottle.GRAVITY.get_y());
-Bottle.FLIP_RATE = 3;
+Bottle.FLIP_RATE = 2.75;
 Bottle.SPIKE_THICKNESS = 12;
 Bottle.SPIKE_EXTENT = 20;
 
@@ -140,12 +141,15 @@ var bottle = null;
 window.addEventListener('load', function() {
     var ctx = document.getElementById('display').getContext('2d');
     bottle = new Bottle(ctx);
-    function render() {
+    function step() {
         bottle.step();
+    }
+    function render() {
         bottle.render();
         window.requestAnimationFrame(render);
     }
     window.requestAnimationFrame(render);
+    setInterval(step, 1000 / Bottle.FPS);
 });
 
 // window.addEventListener('devicemotion', function(event) {
