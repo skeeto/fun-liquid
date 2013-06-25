@@ -12,6 +12,7 @@ function Bottle(ctx) {
     for (var i = 0; i < Bottle.BALL_COUNT; i++) {
         this.addBall();
     }
+    this.fps = new FPS();
 }
 
 Bottle.WIDTH = 50;
@@ -125,6 +126,7 @@ Bottle.prototype.render = function() {
 };
 
 Bottle.prototype.step = function() {
+    this.fps.tick();
     var time = Date.now() / 1000;
     if (Math.sin(time / Bottle.FLIP_RATE * Math.PI) < 0) {
         this.world.SetGravity(Bottle.NGRAVITY);
