@@ -1,5 +1,5 @@
-function Bottle(ctx) {
-    this.ctx = ctx;
+function Bottle(canvas) {
+    this.canvas = canvas;
     this.width = Bottle.WIDTH;
     this.height = Bottle.HEIGHT;
 
@@ -12,7 +12,23 @@ function Bottle(ctx) {
     for (var i = 0; i < Bottle.BALL_COUNT; i++) {
         this.addBall();
     }
+
+    /* Rendering */
     this.fps = new FPS();
+    try {
+        var gl = this.gl = IglooProgram.getContext(canvas);
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        this.programs = {};
+        this.programs.balls =
+            new IglooProgram(gl, 'src/ball.vert', 'src/ball.frag');
+        this.buffers = {};
+        this.buffers.balls = new IglooBuffer(this.gl);
+    } catch (e) {
+        this.programs = null;
+        this.ctx = canvas.getContext('2d');
+        console.warn('Failed to init WebgL: ' + e);
+    }
 }
 
 Bottle.WIDTH = 50;
@@ -89,8 +105,8 @@ Bottle.prototype.addBall = function(pos) {
 
 Bottle.prototype.draw = function(f) {
     try {
-        var w = this.ctx.canvas.width,
-            h = this.ctx.canvas.height;
+        var w = this.canvas.width,
+            h = this.canvas.height;
         this.ctx.fillStyle = 'black';
         this.ctx.fillRect(0, 0, w, h);
         this.ctx.save();
@@ -103,6 +119,35 @@ Bottle.prototype.draw = function(f) {
 };
 
 Bottle.prototype.render = function() {
+    if (this.programs == null) {
+        this.render2D();
+    } else {
+        this.renderGL();
+    }
+};
+
+Bottle.prototype.renderGL = function() {
+    this.gl.clearColor(0, 0, 0, 1);
+    this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+    var w = this.canvas.width, h = this.canvas.height;
+    var sx = w / this.width * 2, sy = h / this.height * 2;
+
+    var pos = new Float32Array(this.balls.length * 2);
+    for (var i = 0; i < this.balls.length; i++) {
+        var p = this.balls[i].GetBody().GetPosition();
+        pos[i * 2 + 0] = p.get_x() / w * sx;
+        pos[i * 2 + 1] = p.get_y() / h * sy;
+    }
+    this.buffers.balls.update(pos);
+
+    this.programs.balls.use()
+        .uniform('color', vec4(1, 1, 1, 1))
+        .uniform('size', Bottle.BALL_RADIUS * sx)
+        .attrib('ball', this.buffers.balls, 2)
+        .draw(this.gl.POINTS, this.balls.length);
+};
+
+Bottle.prototype.render2D = function() {
     var balls = this.balls, polys = this.polys;
     this.draw(function(ctx) {
         ctx.fillStyle = 'white';

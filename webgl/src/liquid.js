@@ -1,7 +1,6 @@
 var bottle = null;
 window.addEventListener('load', function() {
-    var ctx = document.getElementById('display').getContext('2d');
-    bottle = new Bottle(ctx);
+    bottle = new Bottle(document.getElementById('display'));
     function step() {
         bottle.step();
     }
