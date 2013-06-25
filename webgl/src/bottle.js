@@ -16,14 +16,14 @@ function Bottle(canvas) {
     /* Rendering */
     this.fps = new FPS();
     try {
-        var gl = this.gl = IglooProgram.getContext(canvas);
+        var gl = this.gl = Igloo.getContext(canvas, true);
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
         this.programs = {};
         this.programs.balls =
-            new IglooProgram(gl, 'src/ball.vert', 'src/ball.frag');
+            new Igloo.Program(gl, 'src/ball.vert', 'src/ball.frag');
         this.buffers = {};
-        this.buffers.balls = new IglooBuffer(this.gl);
+        this.buffers.balls = new Igloo.Buffer(gl);
     } catch (e) {
         this.programs = null;
         this.ctx = canvas.getContext('2d');
