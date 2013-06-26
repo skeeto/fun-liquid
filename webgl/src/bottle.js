@@ -187,7 +187,8 @@ Bottle.prototype.renderGL = function() {
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this.tex);
     this.programs.liquid.attrib('position', this.buffers.quad, 2)
-        .uniform('scale', vec2(this.midsize / w * 2, this.midsize / h * 2))
+        .uniform('baseSize', this.midsize)
+        .uniform('canvasSize', vec2(w, h))
         .uniform('base', 0, true)
         .draw(gl.TRIANGLE_STRIP, 4);
 };
