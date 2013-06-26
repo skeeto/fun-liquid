@@ -2,6 +2,7 @@ function Bottle(canvas) {
     this.canvas = canvas;
     this.width = Bottle.WIDTH;
     this.height = Bottle.HEIGHT;
+    this.time = 0;
 
     this.world = new B.World(Bottle.GRAVITY, false);
     this.polys = [];
@@ -41,7 +42,7 @@ Bottle.BALL_FRICTION = 0;
 Bottle.BALL_RESTITUTION = 0.3;
 Bottle.GRAVITY = new B.Vec2(0, -20);
 Bottle.NGRAVITY = new B.Vec2(0, -Bottle.GRAVITY.get_y());
-Bottle.FLIP_RATE = 2.75;
+Bottle.FLIP_RATE = 2.4;
 Bottle.SPIKE_THICKNESS = 12;
 Bottle.SPIKE_EXTENT = 20;
 
@@ -173,8 +174,8 @@ Bottle.prototype.render2D = function() {
 
 Bottle.prototype.step = function() {
     this.fps.tick();
-    var time = Date.now() / 1000;
-    if (Math.sin(time / Bottle.FLIP_RATE * Math.PI) < 0) {
+    this.time += 1 / Bottle.FPS;
+    if (Math.sin(this.time / Bottle.FLIP_RATE * Math.PI) < 0) {
         this.world.SetGravity(Bottle.NGRAVITY);
     } else {
         this.world.SetGravity(Bottle.GRAVITY);
