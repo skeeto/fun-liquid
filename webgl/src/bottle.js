@@ -20,11 +20,44 @@ function Bottle(canvas) {
         var gl = this.gl = Igloo.getContext(canvas, true);
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
         this.programs = {};
         this.programs.balls =
             new Igloo.Program(gl, 'src/ball.vert', 'src/ball.frag');
+        this.programs.liquid =
+            new Igloo.Program(gl, 'src/identity.vert', 'src/liquid.frag');
+
         this.buffers = {};
         this.buffers.balls = new Igloo.Buffer(gl);
+        this.buffers.quad = new Igloo.Buffer(gl, new Float32Array([
+                -1, -1, 1, -1, -1, 1, 1, 1
+        ]));
+
+        /* Set up intermediate framebuffer. */
+
+        this.midsize = 512;
+        this.tex = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, this.tex);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.midsize, this.midsize,
+                      0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+
+        this.rb = gl.createRenderbuffer();
+        gl.bindRenderbuffer(gl.RENDERBUFFER, this.rb);
+        gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16,
+                              this.midsize, this.midsize);
+
+        this.fb = gl.createFramebuffer();
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.fb);
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0,
+                                gl.TEXTURE_2D, this.tex, 0);
+        gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT,
+                                   gl.RENDERBUFFER, this.rb);
+
+        gl.bindTexture(gl.TEXTURE_2D, null);
+        gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     } catch (e) {
         this.programs = null;
         this.ctx = canvas.getContext('2d');
@@ -128,8 +161,7 @@ Bottle.prototype.render = function() {
 };
 
 Bottle.prototype.renderGL = function() {
-    this.gl.clearColor(0, 0, 0, 1);
-    this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+    var gl = this.gl;
     var w = this.canvas.width, h = this.canvas.height;
     var sx = w / this.width * 2, sy = h / this.height * 2;
 
@@ -141,11 +173,23 @@ Bottle.prototype.renderGL = function() {
     }
     this.buffers.balls.update(pos);
 
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.fb);
+    gl.clearColor(0, 0, 0, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
     this.programs.balls.use()
         .uniform('color', vec4(1, 1, 1, 1))
         .uniform('size', Bottle.BALL_RADIUS * sx)
         .attrib('ball', this.buffers.balls, 2)
-        .draw(this.gl.POINTS, this.balls.length);
+        .draw(gl.POINTS, this.balls.length);
+
+    this.programs.liquid.use();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.tex);
+    this.programs.liquid.attrib('position', this.buffers.quad, 2)
+        .uniform('scale', vec2(this.midsize / w * 2, this.midsize / h * 2))
+        .uniform('base', 0, true)
+        .draw(gl.TRIANGLE_STRIP, 4);
 };
 
 Bottle.prototype.render2D = function() {
