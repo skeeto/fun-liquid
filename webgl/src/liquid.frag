@@ -7,8 +7,8 @@ uniform float baseSize;
 uniform vec2 canvasSize;
 
 const float pi = 3.14159265;
-const int radius = 4;
-const float threshold = 1.2;
+const int radius = 9;
+const float threshold = 0.75;
 
 vec4 s(vec2 p) {
     return texture2D(base, p);
