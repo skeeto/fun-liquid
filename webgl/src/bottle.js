@@ -26,12 +26,24 @@ function Bottle(canvas) {
             new Igloo.Program(gl, 'src/ball.vert', 'src/ball.frag');
         this.programs.liquid =
             new Igloo.Program(gl, 'src/identity.vert', 'src/liquid.frag');
+        this.programs.spikes =
+            new Igloo.Program(gl, 'src/identity.vert', 'src/color.frag');
 
         this.buffers = {};
         this.buffers.balls = new Igloo.Buffer(gl);
         this.buffers.quad = new Igloo.Buffer(gl, new Float32Array([
                 -1, -1, 1, -1, -1, 1, 1, 1
         ]));
+        var spikes = [];
+        var w = this.width, h = this.height;
+        this.polys.forEach(function(poly) {
+            var x = poly.pos.get_x(), y = poly.pos.get_y();
+            poly.verts.forEach(function(vert) {
+                spikes.push((vert.get_x() + x) / w * 2);
+                spikes.push((vert.get_y() + y) / h * 2);
+            });
+        });
+        this.buffers.spikes = new Igloo.Buffer(gl, new Float32Array(spikes));
 
         /* Set up intermediate framebuffer. */
 
@@ -186,11 +198,17 @@ Bottle.prototype.renderGL = function() {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this.tex);
-    this.programs.liquid.attrib('position', this.buffers.quad, 2)
+    this.programs.liquid
+        .attrib('position', this.buffers.quad, 2)
         .uniform('baseSize', this.midsize)
         .uniform('canvasSize', vec2(w, h))
         .uniform('base', 0, true)
         .draw(gl.TRIANGLE_STRIP, 4);
+
+    this.programs.spikes.use()
+        .uniform('color', vec4(0.5, 0.5, 0.5, 1.0))
+        .attrib('position', this.buffers.spikes, 2)
+        .draw(gl.TRIANGLES, this.polys.length * 3);
 };
 
 Bottle.prototype.render2D = function() {
