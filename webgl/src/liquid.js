@@ -10,11 +10,13 @@ window.addEventListener('load', function() {
     }
     window.requestAnimationFrame(render);
     setInterval(step, 1000 / Bottle.FPS);
-});
 
-// window.addEventListener('devicemotion', function(event) {
-//     var a = event.accelerationIncludingGravity;
-//     var g = new Vec2(-a.x, a.y);
-//     g.Multiply(100);
-//     world.m_gravity = g;
-// });
+    document.getElementById('doBlur')
+        .addEventListener('change', function() {
+            bottle.doBlur = this.checked;
+        });
+    document.getElementById('doThreshold')
+        .addEventListener('change', function() {
+            bottle.doThreshold = this.checked;
+        });
+});

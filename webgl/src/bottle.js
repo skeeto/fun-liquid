@@ -4,6 +4,9 @@ function Bottle(canvas) {
     this.height = Bottle.HEIGHT;
     this.time = 0;
 
+    this.doBlur = true;
+    this.doThreshold = true;
+
     this.world = new B.World(Bottle.GRAVITY, false);
     this.polys = [];
     this.buildOuter();
@@ -203,6 +206,8 @@ Bottle.prototype.renderGL = function() {
         .uniform('baseSize', this.midsize)
         .uniform('canvasSize', vec2(w, h))
         .uniform('base', 0, true)
+        .uniform('doBlur', this.doBlur ? 1 : 0, true)
+        .uniform('doThreshold', this.doThreshold ? 1 : 0, true)
         .draw(gl.TRIANGLE_STRIP, 4);
 
     this.programs.spikes.use()
