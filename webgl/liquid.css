@@ -1,0 +1,22 @@
+body {
+    background: black;
+    color: salmon;
+    font-family: sans-serif;
+    width: 500px;
+    margin: auto;
+}
+
+a {
+    color: DarkKhaki;
+}
+
+
+h1 {
+    text-align: center;
+}
+
+canvas {
+    display: block;
+    margin: auto;
+    border: 1px solid gray;
+}

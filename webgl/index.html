@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Fun Liquid</title>
+    <link rel="stylesheet" href="liquid.css"/>
+    <script src="lib/box2d.js"></script>
+    <script src="lib/igloo-0.0.1.js"></script>
+    <script src="src/fps.js"></script>
+    <script src="src/utility.js"></script>
+    <script src="src/bottle.js"></script>
+    <script src="src/liquid.js"></script>
+  </head>
+  <body>
+    <h1>WebGL Liquid Simulator</h1>
+    <div>
+      <canvas id="display" width="250" height="350"></canvas>
+    </div>
+    <ol>
+      <li>
+        Do a physics simulation of balls in a container
+        (<a href="https://github.com/kripken/box2d.js">box2d.js</a>)
+      </li>
+      <li>
+        Render the simulation onto a raster
+      </li>
+      <li>
+        Blur the image
+        (<label>
+          <input id="doBlur" type="checkbox" checked/> enable
+        </label>)
+      </li>
+      <li>
+        Apply a threshold
+        (<label>
+          <input id="doThreshold" type="checkbox" checked/> enable
+        </label>)
+      </li>
+    </ol>
+    <p>
+      Physics simulation is performed by the CPU and the blurring and
+      thresholding is done by the GPU using WebGL. Also check out the
+    </p>
+    <p>
+      See the <a href="https://github.com/skeeto/fun-liquid">Git
+        repository</a> for full source code listing. The original idea
+      came from here:
+      <a href="http://www.patrickmatte.com/stuff/physicsLiquid/">
+        How to simulate liquid
+      </a>.
+    </p>
+  </body>
+</html>
