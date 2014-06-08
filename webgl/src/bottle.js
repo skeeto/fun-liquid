@@ -1,8 +1,8 @@
 function Bottle(canvas) {
-    this.canvas = canvas;
     this.width = Bottle.WIDTH;
     this.height = Bottle.HEIGHT;
     this.time = 0;
+    this.threshold = 0.5;
 
     this.doBlur = true;
     this.doThreshold = true;
@@ -23,20 +23,19 @@ function Bottle(canvas) {
         var gl = this.gl = Igloo.getContext(canvas, true);
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        gl.disable(gl.DEPTH_TEST);
+        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
-        this.programs = {};
-        this.programs.balls =
-            new Igloo.Program(gl, 'src/ball.vert', 'src/ball.frag');
-        this.programs.liquid =
-            new Igloo.Program(gl, 'src/identity.vert', 'src/liquid.frag');
-        this.programs.spikes =
-            new Igloo.Program(gl, 'src/identity.vert', 'src/color.frag');
+        function program(v, f) {
+            return new Igloo.Program(gl, 'src/' + v, 'src/' + f);
+        }
+        this.programs = {
+            balls:     program('ball.vert', 'ball.frag'),
+            blur:      program('identity.vert', 'blur.frag'),
+            threshold: program('identity.vert', 'threshold.frag'),
+            spikes:    program('identity.vert', 'color.frag')
+        };
 
-        this.buffers = {};
-        this.buffers.balls = new Igloo.Buffer(gl);
-        this.buffers.quad = new Igloo.Buffer(gl, new Float32Array([
-                -1, -1, 1, -1, -1, 1, 1, 1
-        ]));
         var spikes = [];
         var w = this.width, h = this.height;
         this.polys.forEach(function(poly) {
@@ -46,22 +45,20 @@ function Bottle(canvas) {
                 spikes.push((vert.get_y() + y) / h * 2);
             });
         });
-        this.buffers.spikes = new Igloo.Buffer(gl, new Float32Array(spikes));
 
-        /* Set up intermediate framebuffer. */
-        this.midsize = 512;
-        this.tex = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_2D, this.tex);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.midsize, this.midsize,
-                      0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-        this.fb = gl.createFramebuffer();
-        gl.bindFramebuffer(gl.FRAMEBUFFER, this.fb);
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0,
-                                gl.TEXTURE_2D, this.tex, 0);
+        this.buffers = {
+            balls:  new Igloo.Buffer(gl),
+            spikes: new Igloo.Buffer(gl, new Float32Array(spikes)),
+            quad:   new Igloo.Buffer(gl, new Float32Array([
+                    -1, -1, 1, -1, -1, 1, 1, 1
+            ]))
+        };
+
+        this.fbo = gl.createFramebuffer();
+        this.textures = {
+            front: this.createTexture(),
+            back:  this.createTexture()
+        };
     } catch (e) {
         this.programs = null;
         this.ctx = canvas.getContext('2d');
@@ -82,6 +79,53 @@ Bottle.NGRAVITY = new B.Vec2(0, -Bottle.GRAVITY.get_y());
 Bottle.FLIP_RATE = 2.4;
 Bottle.SPIKE_THICKNESS = 12;
 Bottle.SPIKE_EXTENT = 20;
+
+/**
+ * @param {number} x A dimension
+ * @returns {number} The smallest power of 2 >= x
+ */
+Bottle.highest2 = function(x) {
+    return Math.pow(2, Math.ceil(Math.log(x) / Math.LN2));
+};
+
+Bottle.prototype.texScale = function() {
+    return vec2(Bottle.highest2(this.gl.canvas.width),
+                Bottle.highest2(this.gl.canvas.height));
+};
+
+/**
+ * @returns {WebGLTexture} An appropriately initialized intermediate texture
+ */
+Bottle.prototype.createTexture = function() {
+    var gl = this.gl, tex = gl.createTexture(),
+        scale = this.texScale();
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, scale.x, scale.y,
+                  0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    return tex;
+};
+
+/**
+ * Swaps the front and back textures and bind the back texture.
+ */
+Bottle.prototype.swap = function() {
+    var gl = this.gl,
+        temp = this.textures.front;
+    this.textures.front = this.textures.back;
+    this.textures.back = temp;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo);
+    gl.bindTexture(gl.TEXTURE_2D, this.textures.back);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0,
+                            gl.TEXTURE_2D, this.textures.back, 0);
+    gl.clearColor(0, 0, 0, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.bindTexture(gl.TEXTURE_2D, this.textures.front);
+    return this;
+};
 
 Bottle.prototype.buildOuter = function() {
     var thickness = 0.1;
@@ -143,8 +187,8 @@ Bottle.prototype.addBall = function(pos) {
 
 Bottle.prototype.draw = function(f) {
     try {
-        var w = this.canvas.width,
-            h = this.canvas.height;
+        var w = this.ctx.canvas.width,
+            h = this.ctx.canvas.height;
         this.ctx.fillStyle = 'black';
         this.ctx.fillRect(0, 0, w, h);
         this.ctx.save();
@@ -166,9 +210,10 @@ Bottle.prototype.render = function() {
 
 Bottle.prototype.renderGL = function() {
     var gl = this.gl;
-    var w = this.canvas.width, h = this.canvas.height;
+    var w = this.gl.canvas.width, h = this.gl.canvas.height;
     var sx = w / this.width * 2, sy = h / this.height * 2;
 
+    /* Update balls vertex attribute. */
     var pos = new Float32Array(this.balls.length * 2);
     for (var i = 0; i < this.balls.length; i++) {
         var p = this.balls[i].GetBody().GetPosition();
@@ -177,31 +222,41 @@ Bottle.prototype.renderGL = function() {
     }
     this.buffers.balls.update(pos);
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.fb);
-    gl.clearColor(0, 0, 0, 1);
-    gl.clear(gl.COLOR_BUFFER_BIT);
+    this.swap();
+    gl.bindTexture(gl.TEXTURE_2D, this.textures.front);
     this.programs.balls.use()
-        .uniform('color', vec4(1, 1, 1, 1))
-        .uniform('size', Bottle.BALL_RADIUS * sx)
         .attrib('ball', this.buffers.balls, 2)
+        .uniform('size', Bottle.BALL_RADIUS * sx)
         .draw(gl.POINTS, this.balls.length);
+    this.swap();
 
-    this.programs.liquid.use();
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, this.tex);
-    this.programs.liquid
+    this.programs.blur.use()
         .attrib('position', this.buffers.quad, 2)
-        .uniform('baseSize', this.midsize)
-        .uniform('canvasSize', vec2(w, h))
         .uniform('base', 0, true)
-        .uniform('doBlur', this.doBlur ? 1 : 0, true)
-        .uniform('doThreshold', this.doThreshold ? 1 : 0, true)
+        .uniform('scale', this.texScale())
+        .uniform('dir', vec2(0.0, 1.0))
+        .draw(gl.TRIANGLE_STRIP, 4);
+    this.swap();
+
+    this.programs.blur.use()
+        .attrib('position', this.buffers.quad, 2)
+        .uniform('base', 0, true)
+        .uniform('scale', this.texScale())
+        .uniform('dir', vec2(1.0, 0.0))
+        .draw(gl.TRIANGLE_STRIP, 4);
+    this.swap();
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    this.programs.threshold.use()
+        .attrib('position', this.buffers.quad, 2)
+        .uniform('base', 0, true)
+        .uniform('scale', this.texScale())
+        .uniform('threshold', this.threshold)
         .draw(gl.TRIANGLE_STRIP, 4);
 
     this.programs.spikes.use()
-        .uniform('color', vec4(0.5, 0.5, 0.5, 1.0))
         .attrib('position', this.buffers.spikes, 2)
+        .uniform('color', vec4(0.5, 0.5, 0.5, 1.0))
         .draw(gl.TRIANGLES, this.polys.length * 3);
 };
 
