@@ -49,30 +49,19 @@ function Bottle(canvas) {
         this.buffers.spikes = new Igloo.Buffer(gl, new Float32Array(spikes));
 
         /* Set up intermediate framebuffer. */
-
         this.midsize = 512;
         this.tex = gl.createTexture();
         gl.bindTexture(gl.TEXTURE_2D, this.tex);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, this.midsize, this.midsize,
                       0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-
-        this.rb = gl.createRenderbuffer();
-        gl.bindRenderbuffer(gl.RENDERBUFFER, this.rb);
-        gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16,
-                              this.midsize, this.midsize);
-
         this.fb = gl.createFramebuffer();
         gl.bindFramebuffer(gl.FRAMEBUFFER, this.fb);
         gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0,
                                 gl.TEXTURE_2D, this.tex, 0);
-        gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT,
-                                   gl.RENDERBUFFER, this.rb);
-
-        gl.bindTexture(gl.TEXTURE_2D, null);
-        gl.bindRenderbuffer(gl.RENDERBUFFER, null);
-        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     } catch (e) {
         this.programs = null;
         this.ctx = canvas.getContext('2d');
