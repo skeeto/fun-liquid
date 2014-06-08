@@ -2,7 +2,7 @@ function Bottle(canvas) {
     this.width = Bottle.WIDTH;
     this.height = Bottle.HEIGHT;
     this.time = 0;
-    this.threshold = 0.5;
+    this.threshold = 0.3;
 
     this.doBlur = true;
     this.doThreshold = true;
