@@ -2,6 +2,7 @@
 <html>
   <head>
     <title>Fun Liquid</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <link rel="stylesheet" href="liquid.css"/>
     <script src="lib/box2d.js"></script>
     <script src="lib/igloo-0.0.1.js"></script>
@@ -37,9 +38,8 @@
       </li>
     </ol>
     <p>
-      Physics simulation is performed by the CPU and the blurring and
-      thresholding is done by the GPU using WebGL. If WebGL is not
-      available you will not see blurring and thresholding.
+      The physics simulation is computed on the CPU (Box2D) and the
+      blurring and thresholding is handled by the GPU using WebGL.
     </p>
     <p>
       See the <a href="https://github.com/skeeto/fun-liquid">Git
