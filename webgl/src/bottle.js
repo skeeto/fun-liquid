@@ -2,7 +2,7 @@ function Bottle(canvas) {
     this.width = Bottle.WIDTH;
     this.height = Bottle.HEIGHT;
     this.time = 0;
-    this.threshold = 0.3;
+    this.threshold = 0.085;
 
     this.doBlur = true;
     this.doThreshold = true;
@@ -65,12 +65,12 @@ function Bottle(canvas) {
 Bottle.WIDTH = 50;
 Bottle.HEIGHT = 70;
 Bottle.FPS = 60;
-Bottle.BALL_COUNT = 150;
-Bottle.BALL_RADIUS = 1;
+Bottle.BALL_COUNT = 400;
+Bottle.BALL_RADIUS = 0.5;
 Bottle.BALL_DENSITY = 1;
 Bottle.BALL_FRICTION = 0;
 Bottle.BALL_RESTITUTION = 0.3;
-Bottle.GRAVITY = new B.Vec2(0, -20);
+Bottle.GRAVITY = new B.Vec2(0, -10);
 Bottle.NGRAVITY = new B.Vec2(0, -Bottle.GRAVITY.get_y());
 Bottle.FLIP_RATE = 2.4;
 Bottle.SPIKE_THICKNESS = 12;
