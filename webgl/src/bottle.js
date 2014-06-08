@@ -230,27 +230,27 @@ Bottle.prototype.renderGL = function() {
         .draw(gl.POINTS, this.balls.length);
     this.swap();
 
-    this.programs.blur.use()
-        .attrib('position', this.buffers.quad, 2)
-        .uniform('base', 0, true)
-        .uniform('scale', this.texScale())
-        .uniform('dir', vec2(0.0, 1.0))
-        .draw(gl.TRIANGLE_STRIP, 4);
-    this.swap();
+    if (this.doBlur) {
+        this.programs.blur.use()
+            .attrib('position', this.buffers.quad, 2)
+            .uniform('base', 0, true)
+            .uniform('scale', this.texScale())
+            .uniform('dir', vec2(0.0, 1.0))
+            .draw(gl.TRIANGLE_STRIP, 4);
+        this.swap();
 
-    this.programs.blur.use()
-        .attrib('position', this.buffers.quad, 2)
-        .uniform('base', 0, true)
-        .uniform('scale', this.texScale())
-        .uniform('dir', vec2(1.0, 0.0))
-        .draw(gl.TRIANGLE_STRIP, 4);
-    this.swap();
+        this.programs.blur
+            .uniform('dir', vec2(1.0, 0.0))
+            .draw(gl.TRIANGLE_STRIP, 4);
+        this.swap();
+    }
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     this.programs.threshold.use()
         .attrib('position', this.buffers.quad, 2)
         .uniform('base', 0, true)
         .uniform('scale', this.texScale())
+        .uniform('copy', !this.doThreshold, true)
         .uniform('threshold', this.threshold)
         .draw(gl.TRIANGLE_STRIP, 4);
 
